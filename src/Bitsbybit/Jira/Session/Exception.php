@@ -11,16 +11,17 @@ class Exception extends \Exception
      */
     public function __construct(RequestException $e)
     {
+        $bodyContents = $e->getResponse()->getBody()->getContents();
         $code = $e->getCode();
         switch($code){
             case 401:
             case 403:
-                $obj = json_decode($e->getResponse()->getBody()->getContents(), JSON_OBJECT_AS_ARRAY);
+                $obj = json_decode($bodyContents, JSON_OBJECT_AS_ARRAY);
                 $message = $obj['errorMessages'][0];
                 break;
             default:
                 $code = 500;
-                $message = "Communication Failure";
+                $message = "Communication Failure with response: {$bodyContents}";
                 break;
         }
 

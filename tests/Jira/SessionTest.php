@@ -1,8 +1,9 @@
 <?php
-namespace tests\Jira\Session;
+namespace tests\Jira;
 
 use \Bitsbybit\Jira\Urls;
-use \Bitsbybit\Jira\Session\Session as JiraSession;
+use \Bitsbybit\Jira\Session as JiraSession;
+use GuzzleHttp\Exception\ClientException;
 
 class SessionTest extends \PHPUnit\Framework\TestCase
 {
@@ -28,7 +29,7 @@ class SessionTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @covers \Bitsbybit\Jira\Session\Session::getUrl
+     * @covers \Bitsbybit\Jira\Session::getUrl
      */
     public function testHttpsGetUrl()
     {
@@ -40,7 +41,7 @@ class SessionTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @covers \Bitsbybit\Jira\Session\Session::getUrl
+     * @covers \Bitsbybit\Jira\Session::getUrl
      */
     public function testHttpGetUrl()
     {
@@ -52,7 +53,7 @@ class SessionTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @covers \Bitsbybit\Jira\Session\Session::login
+     * @covers \Bitsbybit\Jira\Session::login
      * @expectedException \Bitsbybit\Jira\Session\Exception
      *
      */
@@ -75,7 +76,7 @@ class SessionTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @covers \Bitsbybit\Jira\Session\Session::login
+     * @covers \Bitsbybit\Jira\Session::login
      *
      */
     public function testSuccessfulLogin()
@@ -96,18 +97,32 @@ class SessionTest extends \PHPUnit\Framework\TestCase
             ->willReturn($request);
 
         $result = $jira->login($username, $password);
+        $this->assertTrue($result);
     }
 
 
-//    /**
-//     * @test
-//     * @covers \Bitsbybit\Jira\Session\Session::login
-//     *
-//     */
-//    public function testLogin()
-//    {
-//        $httpClient = new \GuzzleHttp\Client();
-//        $jira = new JiraSession($httpClient, '*.atlassian.net', true);
-//        $jira->login('','');
-//    }
+    /**
+     * @test
+     * @covers \Bitsbybit\Jira\Session::login
+     *
+     */
+    public function testLogin()
+    {
+        $jira = JiraSession::create('*.atlassian.net', [
+            'ssl' => true
+        ]);
+        try {
+            $jira->login('', '');
+        }catch(\Exception $e){
+            echo "MESSAGE: ".$e->getMessage();
+        }
+
+        try {
+            $jira->getIssue("HI-762");
+        }catch(ClientException $e){
+            echo PHP_EOL."[".$e->getCode()."] ". $e->getMessage(). PHP_EOL;
+            echo print_r($e->getRequest()->getHeaders(),true).PHP_EOL;
+            echo $e->getTraceAsString();
+        }
+    }
 }
