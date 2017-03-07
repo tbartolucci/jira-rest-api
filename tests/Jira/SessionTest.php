@@ -117,12 +117,13 @@ class SessionTest extends \PHPUnit\Framework\TestCase
             echo "MESSAGE: ".$e->getMessage();
         }
 
-        try {
-            $jira->getIssue("HI-762");
-        }catch(ClientException $e){
-            echo PHP_EOL."[".$e->getCode()."] ". $e->getMessage(). PHP_EOL;
-            echo print_r($e->getRequest()->getHeaders(),true).PHP_EOL;
-            echo $e->getTraceAsString();
-        }
+        echo "RESPONSE".PHP_EOL;
+
+//        try {
+//            $jira->getIssue("HI-762");
+//        }catch(\Exception $e){
+//            echo PHP_EOL."[".$e->getCode()."] ". $e->getMessage(). PHP_EOL;
+//            echo $e->getTraceAsString();
+//        }
     }
 }
