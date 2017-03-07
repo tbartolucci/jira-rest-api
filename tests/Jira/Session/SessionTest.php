@@ -34,7 +34,7 @@ class SessionTest extends \PHPUnit\Framework\TestCase
     {
         $jira = new JiraSession($this->client, $this->domain);
 
-        $url = $jira->getUrl("jira/rest/api");
+        $url = $jira->getUrl("/jira/rest/api");
         $this->assertEquals("https://example.bitsbybit.com/jira/rest/api", $url);
     }
 
@@ -46,7 +46,7 @@ class SessionTest extends \PHPUnit\Framework\TestCase
     {
         $jira = new JiraSession($this->client, $this->domain, false);
 
-        $url = $jira->getUrl("jira/rest/api");
+        $url = $jira->getUrl("/jira/rest/api");
         $this->assertEquals("http://example.bitsbybit.com/jira/rest/api", $url);
     }
 
@@ -76,7 +76,6 @@ class SessionTest extends \PHPUnit\Framework\TestCase
     /**
      * @test
      * @covers \Bitsbybit\Jira\Session\Session::login
-     * @expectedException \Bitsbybit\Jira\Session\Exception
      *
      */
     public function testSuccessfulLogin()
@@ -86,26 +85,29 @@ class SessionTest extends \PHPUnit\Framework\TestCase
         $jira = new JiraSession($this->client, $this->domain);
         $url = $jira->getUrl(Urls::V1_SESSION);
 
+        $request = $this->getMockBuilder('Psr\Http\Message\ResponseInterface')
+            ->getMock();
+
         $this->client->expects($this->once())
             ->method('request')
             ->with('POST', $url, [
                 'json' => [ 'username' => $username, 'password' => $password ]
             ])
-            ->willReturn(json_encode(['session' => []]));
+            ->willReturn($request);
 
-        $jira->login($username, $password);
+        $result = $jira->login($username, $password);
     }
 
 
-    /**
-     * @test
-     * @covers \Bitsbybit\Jira\Session\Session::login
-     *
-     */
-    public function testLogin()
-    {
-        $httpClient = new \GuzzleHttp\Client();
-        $jira = new JiraSession($httpClient, '*.atlassian.net', true);
-        $jira->login('','');
-    }
+//    /**
+//     * @test
+//     * @covers \Bitsbybit\Jira\Session\Session::login
+//     *
+//     */
+//    public function testLogin()
+//    {
+//        $httpClient = new \GuzzleHttp\Client();
+//        $jira = new JiraSession($httpClient, '*.atlassian.net', true);
+//        $jira->login('','');
+//    }
 }
