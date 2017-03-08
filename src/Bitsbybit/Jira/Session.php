@@ -53,7 +53,7 @@ class Session
      */
     public static function create($domain, $options=[])
     {
-        $httpClient = new HttpClient();
+        $httpClient = new HttpClient(__DIR__ . '/jira-cookie.txt');
         return new static($httpClient, $domain, $options);
     }
 

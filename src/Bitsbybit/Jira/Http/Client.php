@@ -3,6 +3,29 @@ namespace Bitsbybit\Jira\Http;
 
 class Client
 {
+    /**
+     * 
+     * @var string
+     */
+    private $cookieFile = __DIR__ . '/cookie.txt';
+    
+    /**
+     * 
+     * @param unknown $cookieFile
+     */
+    public function __construct($cookieFile)
+    {
+        $this->cookieFile = $cookieFile;
+    }
+    
+    /**
+     * 
+     * @param unknown $method
+     * @param unknown $url
+     * @param array $options
+     * @throws \Exception
+     * @return \Bitsbybit\Jira\Http\Response
+     */
     public function request($method, $url, $options=[])
     {
         $c = curl_init($url);
@@ -29,16 +52,10 @@ class Client
 
                 break;
         }
-        if( isset($options['cookies']) ){
-            $cookie = '';
-            foreach($options['cookies'] as $key => $value){
-                $cookie .= $key.'='.$value;
-            }
-            // Set a COOKIE in the request
-            //curl_setopt($c, CURLOPT_COOKIE, $cookie);
-            $headers[] = "Cookie: " . $cookie;
-        }
-
+        
+        curl_setopt( $c, CURLOPT_COOKIEJAR, $this->cookieFile );
+        curl_setopt( $c, CURLOPT_COOKIEFILE, $this->cookieFile);
+        
         // Set the headers for the request
         curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
         
