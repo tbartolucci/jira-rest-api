@@ -6,7 +6,7 @@ $username = $argv[2];
 $password = $argv[3];
 $issueKey = $argv[4];
 
-$jira = \Bitsbybit\Jira\Session::create($domain, [
+$jira = \Bitsbybit\Jira\Session::create($domain, __DIR__ . '/cookie.txt', [
     'ssl' => true
 ]);
 try {
@@ -14,7 +14,6 @@ try {
 }catch(\Exception $e){
     echo "MESSAGE: ".$e->getMessage();
 }
-
 
 $res = $jira->getIssue($issueKey);
 print_r($res);

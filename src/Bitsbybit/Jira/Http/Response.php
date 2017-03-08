@@ -4,9 +4,9 @@ namespace Bitsbybit\Jira\Http;
 class Response
 {
     /**
-     * @var resource
+     * @var Client
      */
-    private $ch;
+    private $client;
 
     /**
      * @var string
@@ -15,12 +15,12 @@ class Response
 
     /**
      * Response constructor.
-     * @param resource $ch
+     * @param Client $client
      * @param string $response
      */
-    public function __construct($ch, $response)
+    public function __construct($client, $response)
     {
-        $this->ch = $ch;
+        $this->client = $client;
         $this->response = $response;
     }
 
@@ -34,7 +34,7 @@ class Response
      */
     public function getCode()
     {
-        return curl_getinfo($this->ch,CURLINFO_HTTP_CODE);
+        return curl_getinfo($this->client,CURLINFO_HTTP_CODE);
     }
 
     /**

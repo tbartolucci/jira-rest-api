@@ -48,12 +48,13 @@ class Session
      * Helper static method to create with GuzzleHttp\Client
      *
      * @param $domain
+     * @param $cookieFile
      * @param array $options
      * @return \Bitsbybit\Jira\Session
      */
-    public static function create($domain, $options=[])
+    public static function create($domain, $cookieFile, $options=[])
     {
-        $httpClient = new HttpClient(__DIR__ . '/jira-cookie.txt');
+        $httpClient = new HttpClient($cookieFile);
         return new static($httpClient, $domain, $options);
     }
 
