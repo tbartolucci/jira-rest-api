@@ -2,6 +2,7 @@
 namespace Bitsbybit\Jira;
 
 use Bitsbybit\Jira\Http\Client as HttpClient;
+use Bitsbybit\Jira\Http\Response as HttpResponse;
 
 class Session
 {
@@ -66,6 +67,7 @@ class Session
     {
         $this->client = $httpClient;
         $this->domain = $domain;
+        $this->sessionName = "JSESSIONID";
         $this->parseOptions($options);
     }
 
@@ -98,28 +100,50 @@ class Session
     }
 
     /**
+     * @param HttpResponse $response
+     */
+    public function parseLoginResponse(HttpResponse $response)
+    {
+        $parsedBody = $response->getJsonBody();
+        $this->loginInfo = $parsedBody['loginInfo'];
+      
+        $cookies = $response->getHeaders()['Set-Cookie'];
+        foreach($cookies as $cookie){
+            if( strpos($cookie, "JSESSIONID") !== false ){
+                $parts = explode(';',$cookie);
+                foreach($parts as $part){
+                    if( strpos($part, 'JSESSIONID') !== false ){
+                        $itemParts = explode('=', $part);
+                        $this->sessionId = $itemParts[1];
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
      * Login to Jira Cloud using a username and password.
      *
      * @param string $username
      * @param string $password
      * @return boolean
      *
-     * @throws \Exception
+     * @throws SessionException
      */
     public function login($username, $password)
     {
         $url = $this->getUrl(Urls::V1_SESSION);
 
-        try{
-            $res = $this->client->request('POST', $url, [
-                'json' => [ 'username' => $username, 'password' => $password ]
-            ]);
-        } catch (\Exception $e){
-          throw $e;
+        $response = $this->client->request('POST', $url, [
+            'json' => [ 'username' => $username, 'password' => $password ]
+        ]);
+        
+        if( $response->getCode() != 200 ){
+            throw new SessionException($response);
         }
-
-       var_dump($res);
-
+      
+        $this->parseLoginResponse($response);
+      
         return true;
     }
 
@@ -128,14 +152,12 @@ class Session
      */
     public function getIssue($issueKey)
     {
-        //$url = $this->getUrl(Urls::V2_ISSUE) . "/" . $issueKey;
+        $url = $this->getUrl(Urls::V2_ISSUE) . "/" . $issueKey;
 
-        $res = $this->client->request('GET', Urls::V2_ISSUE . "/" . $issueKey, [
-            'headers' => [
-                'cookie' => "{$this->sessionName}={$this->sessionId}",
-                "Content-Type" => "application/json"
-            ]
+        $res = $this->client->request('GET', $url, [
+            'cookies' => [ $this->sessionName => $this->sessionId ]
         ]);
-        var_dump($res);
+        
+        return $res->getJsonBody();
     }
 }

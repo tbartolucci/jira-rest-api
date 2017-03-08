@@ -6,6 +6,7 @@ class Client
     public function request($method, $url, $options=[])
     {
         $c = curl_init($url);
+        
         // Return the contents of the response
         curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
         // Return the response headers
@@ -31,14 +32,24 @@ class Client
         if( isset($options['cookies']) ){
             $cookie = '';
             foreach($options['cookies'] as $key => $value){
-                $cookie .= $key.'='.$value.'; ';
+                $cookie .= $key.'='.$value;
             }
             // Set a COOKIE in the request
-            curl_setopt($c, CURLOPT_COOKIE, $cookie);
+            //curl_setopt($c, CURLOPT_COOKIE, $cookie);
+            $headers[] = "Cookie: " . $cookie;
         }
 
         // Set the headers for the request
         curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
+        
+        // Verify SSL info if a CA file is available.
+        if( isset($options['ca-file']) && file_exists($options['ca-file']) ){
+            curl_setopt($c, CURLOPT_SSL_VERIFYPEER, 1);
+            curl_setopt($c, CURLOPT_CAINFO, $options['ca-file']);
+        }else{
+            curl_setopt($c, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($c, CURLOPT_SSL_VERIFYHOST, 0);
+        }
 
         // Execute the request
         $response = curl_exec($c);

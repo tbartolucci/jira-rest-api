@@ -24,6 +24,11 @@ class Response
         $this->response = $response;
     }
 
+    public function __toString()
+    {
+        return $this->response;
+    }
+    
     /**
      * @return mixed
      */
@@ -45,7 +50,7 @@ class Response
      */
     public function getBody()
     {
-        return substr($this->getHeaderSize(),strlen($this->response));
+        return substr($this->response, $this->getHeaderSize(), strlen($this->response));
     }
 
     /**
@@ -67,16 +72,19 @@ class Response
      */
     public function getHeaders()
     {
-        $headers = array();
+        $headers = [];
 
         $header_text = substr($this->response, 0, $this->getHeaderSize());
-
-        foreach (explode("\r\n", $header_text) as $i => $line){
+        $lines = explode(PHP_EOL, $header_text);
+        
+        foreach ( $lines as $i => $line){
+            if( empty($line) ) continue; 
+            
             if ($i === 0) {
                 $headers['http_code'] = $line;
             } else {
                 list ($key, $value) = explode(': ', $line);
-                $headers[$key] = $value;
+                $headers[$key][] = $value;
             }
         }
 

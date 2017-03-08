@@ -99,31 +99,4 @@ class SessionTest extends \PHPUnit\Framework\TestCase
         $result = $jira->login($username, $password);
         $this->assertTrue($result);
     }
-
-
-    /**
-     * @test
-     * @covers \Bitsbybit\Jira\Session::login
-     *
-     */
-    public function testLogin()
-    {
-        $jira = JiraSession::create('*.atlassian.net', [
-            'ssl' => true
-        ]);
-        try {
-            $jira->login('', '');
-        }catch(\Exception $e){
-            echo "MESSAGE: ".$e->getMessage();
-        }
-
-        echo "RESPONSE".PHP_EOL;
-
-//        try {
-//            $jira->getIssue("HI-762");
-//        }catch(\Exception $e){
-//            echo PHP_EOL."[".$e->getCode()."] ". $e->getMessage(). PHP_EOL;
-//            echo $e->getTraceAsString();
-//        }
-    }
 }
