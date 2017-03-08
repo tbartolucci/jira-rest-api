@@ -6,7 +6,10 @@ class Client
     public function request($method, $url, $options=[])
     {
         $c = curl_init($url);
+        // Return the contents of the response
         curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+        // Return the response headers
+        curl_setopt($c, CURLOPT_HEADER, 1);
         $headers = ['Content-Type: application/json'];
 
         switch($method){
@@ -14,11 +17,11 @@ class Client
             case 'PUT':
                 $jsonString = json_encode($options['json']);
                 $headers[] = 'Content-Length: ' . strlen($jsonString);
-                curl_setopt($c, CURLOPT_CUSTOMREQUEST, $method);
+                // Set the request data in the body
                 curl_setopt($c, CURLOPT_POSTFIELDS, $jsonString);
-                break;
             case 'DELETE':
-                curl_setopt($c, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                // Set the request method to PUT, POST, or DELETE
+                curl_setopt($c, CURLOPT_CUSTOMREQUEST, $method);
                 break;
             case 'GET':
             default:
@@ -30,11 +33,14 @@ class Client
             foreach($options['cookies'] as $key => $value){
                 $cookie .= $key.'='.$value.'; ';
             }
+            // Set a COOKIE in the request
             curl_setopt($c, CURLOPT_COOKIE, $cookie);
         }
 
+        // Set the headers for the request
         curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
 
+        // Execute the request
         $response = curl_exec($c);
         if( $response === false ){
             throw new \Exception(curl_error($c), curl_errno($c));
