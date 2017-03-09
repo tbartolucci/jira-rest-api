@@ -15,20 +15,66 @@ class Client
     
     /**
      * 
-     * @param string $cookieFile
+     * @var string
      */
-    public function __construct($cookieFile)
-    {
-        $this->cookieFile = $cookieFile;
-        $this->ch = curl_init();
-    }
-
+    private $caFile;
+    
     /**
-     * @return resource
+     * 
+     * @var array
      */
-    public function getClientResource()
+    private $requestOptions;
+    
+    /**
+     * 
+     * @param array $options
+     */
+    public function __construct($options)
     {
-        return $this->ch;
+        $this->cookieFile = $options['cookie-file'];
+        if( isset($options['ca-file']) && file_exists($options['ca-file']) ){
+            $this->caFile = $options['ca-file'];
+        }
+    }
+    
+    /**
+     * @return mixed
+     */
+    public function getResponseCode()
+    {
+        return curl_getinfo($this->ch,CURLINFO_HTTP_CODE);
+    }
+    
+    /**
+     * @return mixed
+     */
+    public function getResponseHeaderSize()
+    {
+        return curl_getinfo($this->ch,CURLINFO_HEADER_SIZE);
+    }
+    
+    /**
+     * These options will be used for all requests
+     */
+    protected function setDefaultRequestOptions()
+    {
+        // Return the contents of the response
+        $this->requestOptions[CURLOPT_RETURNTRANSFER] = 1;
+        // Return the response headers
+        $this->requestOptions[CURLOPT_HEADER] = 1;
+        
+        // Set local cookie storage
+        $this->requestOptions[CURLOPT_COOKIEJAR] = $this->cookieFile;
+        $this->requestOptions[CURLOPT_COOKIEFILE] = $this->cookieFile;
+        
+        // Verify SSL info if a CA file is available.
+        if( $this->caFile !== null ){
+            $this->requestOptions[CURLOPT_SSL_VERIFYPEER] = 1;
+            $this->requestOptions[CURLOPT_CAINFO] = $this->caFile;
+        }else{
+            $this->requestOptions[CURLOPT_SSL_VERIFYPEER] = 0;
+            $this->requestOptions[CURLOPT_SSL_VERIFYHOST] = 0;
+        }
     }
     
     /**
@@ -41,12 +87,12 @@ class Client
      */
     public function request($method, $url, $options=[])
     {
+        $this->ch = curl_init();
         // Set the URL
-        curl_setopt($this->ch, CURLOPT_URL, $url);
-        // Return the contents of the response
-        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
-        // Return the response headers
-        curl_setopt($this->ch, CURLOPT_HEADER, 1);
+        $this->requestOptions[CURLOPT_URL] = $url;
+               
+        $this->setDefaultRequestOptions();
+        
         $headers = ['Content-Type: application/json'];
 
         switch($method){
@@ -55,32 +101,22 @@ class Client
                 $jsonString = json_encode($options['json']);
                 $headers[] = 'Content-Length: ' . strlen($jsonString);
                 // Set the request data in the body
-                curl_setopt($this->ch, CURLOPT_POSTFIELDS, $jsonString);
+                $this->requestOptions[CURLOPT_POSTFIELDS] = $jsonString;
             case 'DELETE':
                 // Set the request method to PUT, POST, or DELETE
-                curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $method);
+                $this->requestOptions[CURLOPT_CUSTOMREQUEST] = $method;
                 break;
             case 'GET':
             default:
-
+                unset($this->requestOptions[CURLOPT_CUSTOMREQUEST]);
+                unset($this->requestOptions[CURLOPT_POSTFIELDS]);
                 break;
         }
-
-        // Set local cookie storage
-        curl_setopt( $this->ch, CURLOPT_COOKIEJAR, $this->cookieFile );
-        curl_setopt( $this->ch, CURLOPT_COOKIEFILE, $this->cookieFile);
         
         // Set the headers for the request
-        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+        $this->requestOptions[CURLOPT_HTTPHEADER] = $headers;
         
-        // Verify SSL info if a CA file is available.
-        if( isset($options['ca-file']) && file_exists($options['ca-file']) ){
-            curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 1);
-            curl_setopt($this->ch, CURLOPT_CAINFO, $options['ca-file']);
-        }else{
-            curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, 0);
-        }
+        curl_setopt_array($this->ch,$this->requestOptions);
 
         // Execute the request
         $response = curl_exec($this->ch);

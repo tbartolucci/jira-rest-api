@@ -24,33 +24,21 @@ class Response
         $this->response = $response;
     }
 
-    public function __toString()
-    {
-        return $this->response;
-    }
-    
     /**
+     * 
      * @return mixed
      */
     public function getCode()
     {
-        return curl_getinfo($this->client,CURLINFO_HTTP_CODE);
+        return $this->client->getResponseCode();
     }
-
-    /**
-     * @return mixed
-     */
-    public function getHeaderSize()
-    {
-        return curl_getinfo($this->ch,CURLINFO_HEADER_SIZE);
-    }
-
+    
     /**
      * @return string
      */
     public function getBody()
     {
-        return substr($this->response, $this->getHeaderSize(), strlen($this->response));
+        return substr($this->response, $this->client->getResponseHeaderSize(), strlen($this->response));
     }
 
     /**
@@ -74,7 +62,7 @@ class Response
     {
         $headers = [];
 
-        $header_text = substr($this->response, 0, $this->getHeaderSize());
+        $header_text = substr($this->response, 0, $this->client->getResponseHeaderSize());
         $lines = explode(PHP_EOL, $header_text);
         
         foreach ( $lines as $i => $line){

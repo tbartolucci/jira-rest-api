@@ -54,7 +54,7 @@ class Session
      */
     public static function create($domain, $cookieFile, $options=[])
     {
-        $httpClient = new HttpClient($cookieFile);
+        $httpClient = new HttpClient([ 'cookie-file' => $cookieFile]);
         return new static($httpClient, $domain, $options);
     }
 
@@ -155,10 +155,8 @@ class Session
     {
         $url = $this->getUrl(Urls::V2_ISSUE) . "/" . $issueKey;
 
-        $res = $this->client->request('GET', $url, [
-            'cookies' => [ $this->sessionName => $this->sessionId ]
-        ]);
-        
+        $res = $this->client->request('GET', $url);
+        var_dump($res);
         return $res->getJsonBody();
     }
 }
