@@ -1,9 +1,7 @@
 <?php
 namespace tests\Jira;
 
-use \Bitsbybit\Jira\Urls;
 use \Bitsbybit\Jira\Session as JiraSession;
-use GuzzleHttp\Exception\ClientException;
 
 class SessionTest extends \PHPUnit\Framework\TestCase
 {
@@ -45,58 +43,9 @@ class SessionTest extends \PHPUnit\Framework\TestCase
      */
     public function testHttpGetUrl()
     {
-        $jira = new JiraSession($this->client, $this->domain, false);
+        $jira = new JiraSession($this->client, $this->domain, [ 'ssl' => false]);
 
         $url = $jira->getUrl("/jira/rest/api");
         $this->assertEquals("http://example.bitsbybit.com/jira/rest/api", $url);
-    }
-
-    /**
-     * @test
-     * @covers \Bitsbybit\Jira\Session::login
-     * @expectedException \Bitsbybit\Jira\Session\Exception
-     *
-     */
-    public function testFailedLogin()
-    {
-        $requestException = $this->getMockBuilder('\GuzzleHttp\Exception\RequestException')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $username = 'testuser';
-        $password = 'testpass';
-        $jira = new JiraSession($this->client, $this->domain);
-
-        $this->client->expects($this->once())
-            ->method('request')
-            ->willThrowException($requestException);
-
-        $jira->login($username, $password);
-    }
-
-    /**
-     * @test
-     * @covers \Bitsbybit\Jira\Session::login
-     *
-     */
-    public function testSuccessfulLogin()
-    {
-        $username = 'testuser';
-        $password = 'testpass';
-        $jira = new JiraSession($this->client, $this->domain);
-        $url = $jira->getUrl(Urls::V1_SESSION);
-
-        $request = $this->getMockBuilder('Psr\Http\Message\ResponseInterface')
-            ->getMock();
-
-        $this->client->expects($this->once())
-            ->method('request')
-            ->with('POST', $url, [
-                'json' => [ 'username' => $username, 'password' => $password ]
-            ])
-            ->willReturn($request);
-
-        $result = $jira->login($username, $password);
-        $this->assertTrue($result);
     }
 }

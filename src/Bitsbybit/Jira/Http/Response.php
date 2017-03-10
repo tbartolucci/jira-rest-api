@@ -48,11 +48,10 @@ class Response
     public function getJsonBody($asArray=true)
     {
         if( $asArray ){
-            $opt = JSON_OBJECT_AS_ARRAY;
+            return json_decode($this->getBody(),JSON_OBJECT_AS_ARRAY);
         }else{
-            $opt = JSON_FORCE_OBJECT;
+            return json_decode($this->getBody());
         }
-        return json_decode($this->getBody(),$opt);
     }
 
     /**
