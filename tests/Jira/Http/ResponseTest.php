@@ -14,6 +14,11 @@ class ResponseTest extends \PHPUnit\Framework\TestCase
     private $text;
 
     /**
+     * @var int
+     */
+    private $headerSize;
+
+    /**
      * @var \Bitsbybit\Jira\Http\Response
      */
     private $response;
@@ -26,8 +31,17 @@ class ResponseTest extends \PHPUnit\Framework\TestCase
 
         $this->text = <<<'EOD'
 HTTP/1.1 200 OK
+Server: nginx
+Date: Thu, 09 Mar 2017 03:27:58 GMT
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Vary: Accept-Encoding
+X-AREQUESTID: 1347x110689x1
+Set-Cookie: atlassian.xsrf.token=BCSV-JET9-JCQS-W9MT|5c4832aadb2a0837af1eb9adc4bd192190a479b1|lin; Path=/; Secure
 { "id" : "12341231", "issueKey" : "AT-100" }
 EOD;
+        $this->headerSize = strlen($this->text) - strlen('{ "id" : "12341231", "issueKey" : "AT-100" }');
 
         $this->response = new \Bitsbybit\Jira\Http\Response($this->client, $this->text);
     }
@@ -56,7 +70,7 @@ EOD;
     {
         $this->client->expects($this->once())
             ->method('getResponseHeaderSize')
-            ->willReturn(strlen("HTTP/1.1 200 OK\n"));
+            ->willReturn($this->headerSize);
 
         $body = $this->response->getBody();
         $this->assertEquals('{ "id" : "12341231", "issueKey" : "AT-100" }', $body);
@@ -70,7 +84,7 @@ EOD;
     {
         $this->client->expects($this->once())
             ->method('getResponseHeaderSize')
-            ->willReturn(strlen("HTTP/1.1 200 OK\n"));
+            ->willReturn($this->headerSize);
 
         $body = $this->response->getJsonBody();
         $this->assertEquals([ "id" => "12341231", "issueKey" => "AT-100" ], $body);
@@ -84,7 +98,7 @@ EOD;
     {
         $this->client->expects($this->once())
             ->method('getResponseHeaderSize')
-            ->willReturn(strlen("HTTP/1.1 200 OK\n"));
+            ->willReturn($this->headerSize);
 
         $body = $this->response->getJsonBody(false);
         $expectedObject = new \StdClass;
@@ -93,26 +107,18 @@ EOD;
         $this->assertEquals($expectedObject, $body);
     }
 
+    /**
+     * @test
+     * @covers \Bitsbybit\Jira\Http\Response
+     */
     public function testGetHeaders()
     {
-        $this->text = <<< 'EOD'
-HTTP/1.1 404 Not Found
-Server: nginx
-Date: Thu, 09 Mar 2017 03:27:58 GMT
-Content-Type: application/json;charset=UTF-8
-Transfer-Encoding: chunked
-Connection: keep-alive
-Vary: Accept-Encoding
-X-AREQUESTID: 1347x110689x1
-Set-Cookie: atlassian.xsrf.token=BCSV-JET9-JCQS-W9MT|5c4832aadb2a0837af1eb9adc4bd192190a479b1|lin; Path=/; Secure
-EOD;
         $this->client->expects($this->once())
             ->method('getResponseHeaderSize')
-            ->willReturn(strlen($this->text));
+            ->willReturn($this->headerSize);
 
         $headers = $this->response->getHeaders();
-        $this->assertEquals([
-            'http_code' => 'HTTP/1.1 404 Not Found'
-        ], $headers);
+
+        $this->assertEquals('HTTP/1.1 200 OK',$headers['http_code']);
     }
 }
