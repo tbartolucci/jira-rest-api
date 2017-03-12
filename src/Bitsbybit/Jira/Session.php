@@ -71,6 +71,23 @@ class Session
         $this->sessionName = "JSESSIONID";
         $this->parseOptions($options);
     }
+    
+    /**
+     * @return array
+     */
+    public function getLoginInfo()
+    {
+        return $this->loginInfo;
+    }
+    
+    /**
+     * 
+     * @return string
+     */
+    public function getSessionId()
+    {
+        return $this->sessionId;
+    }
 
     /**
      * @param array $options
@@ -108,7 +125,11 @@ class Session
         $parsedBody = $response->getJsonBody();
         $this->loginInfo = $parsedBody['loginInfo'];
       
-        $cookies = $response->getHeaders()['Set-Cookie'];
+        $headers = $response->getHeaders();
+        if( !isset($headers['Set-Cookie']) ){
+            return;
+        }
+        $cookies = $headers['Set-Cookie'];
         foreach($cookies as $cookie){
             if( strpos($cookie, "JSESSIONID") !== false ){
                 $parts = explode(';',$cookie);
@@ -156,7 +177,7 @@ class Session
         $url = $this->getUrl(Urls::V2_ISSUE) . "/" . $issueKey;
 
         $res = $this->client->request('GET', $url);
-        var_dump($res);
+        
         return $res->getJsonBody();
     }
 }

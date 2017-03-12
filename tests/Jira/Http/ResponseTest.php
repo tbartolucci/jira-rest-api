@@ -120,5 +120,6 @@ EOD;
         $headers = $this->response->getHeaders();
 
         $this->assertEquals('HTTP/1.1 200 OK',$headers['http_code']);
+        $this->assertCount(9, $headers);
     }
 }
