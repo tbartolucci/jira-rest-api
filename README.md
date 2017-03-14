@@ -1,6 +1,8 @@
 # jira-rest-api
 Jira API connector in PHP
 
+https://docs.atlassian.com/jira/REST/cloud/
+
 I created this package because the older package I was using fell
 out of compatiblity with Atlassian's API.  Specifically the authentication was 
 no longer supported and I needed cookie based authentication.  The Atlassian
