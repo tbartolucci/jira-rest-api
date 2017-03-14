@@ -171,6 +171,7 @@ class Session
 
     /**
      * @param $issueKey
+     * @return array
      */
     public function getIssue($issueKey)
     {

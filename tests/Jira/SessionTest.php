@@ -155,6 +155,10 @@ class SessionTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($result);
     }
     
+    /**
+     * @test
+     * @covers  \Bitsbybit\Jira\Session::getIssue
+     */
     public function testGetIssue()
     {
         $issueKey = 'AT-100';
