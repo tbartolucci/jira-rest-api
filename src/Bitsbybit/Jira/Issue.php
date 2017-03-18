@@ -11,6 +11,8 @@ class Issue
      * @var string
      */
     private $issueKey;
+    private $resolution;
+    private $links;
     /**
      * @var array
      */
@@ -24,6 +26,8 @@ class Issue
     {
         $this->id = $properties['id'];
         $this->issueKey = $properties['key'];
+        $this->resolution = $properties['resolution'];
+        $this->links = $properties['issueLinks'];
         $this->properties = $properties;
     }
 
