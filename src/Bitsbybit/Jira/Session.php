@@ -178,6 +178,6 @@ class Session
 
         $res = $this->client->request('GET', $url);
         
-        return $res->getJsonBody();
+        return new Issue($res->getJsonBody());
     }
 }

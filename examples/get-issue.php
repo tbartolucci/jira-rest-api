@@ -16,4 +16,4 @@ try {
 }
 
 $res = $jira->getIssue($issueKey);
-print_r($res);
+var_dump($res);

@@ -14,4 +14,12 @@ class Issue
         $this->issueKey = $properties['key'];
         $this->properties = $properties;
     }
+
+    /**
+     * @return mixed
+     */
+    public function __debugInfo()
+    {
+        return $this->properties;
+    }
 }
