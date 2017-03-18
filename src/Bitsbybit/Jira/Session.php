@@ -170,7 +170,8 @@ class Session
     }
 
     /**
-     * @param $issueKey
+     * @param string $issueKey
+     * @return Issue
      */
     public function getIssue($issueKey)
     {

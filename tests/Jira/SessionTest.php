@@ -154,12 +154,17 @@ class SessionTest extends \PHPUnit\Framework\TestCase
         $result = $jira->login($username, $password);
         $this->assertTrue($result);
     }
-    
+
+    /**
+     * @test
+     * @covers \Bitsbybit\Jira\Session::getIssue
+     */
     public function testGetIssue()
     {
         $issueKey = 'AT-100';
-        $expectedResponseArray = [ 'issueKey' => $issueKey ];
-        
+        $expectedResponseArray = [ 'id' => '123512312', 'key' => $issueKey ];
+        $issue = new \Bitsbybit\Jira\Issue($expectedResponseArray);
+
         $response = $this->getMockBuilder('\Bitsbybit\Jira\Http\Response')
             ->disableOriginalConstructor()
             ->getMock();
@@ -173,7 +178,7 @@ class SessionTest extends \PHPUnit\Framework\TestCase
             ->willReturn($response);
             
         $jira = new JiraSession($this->client, $this->domain);
-        $issueArray = $jira->getIssue($issueKey);
-        $this->assertSame($expectedResponseArray, $issueArray);
+        $returnedIssue = $jira->getIssue($issueKey);
+        $this->assertEquals($issue, $returnedIssue );
     }
 }
